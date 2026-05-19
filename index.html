@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrecioJusto - Comparador de Precios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Buscador */
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .search-box button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #0d47a1;
+        }
+
+        .categories {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-tag {
+            padding: 0.5rem 1.2rem;
+            background: #f0f0f0;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .category-tag:hover {
+            background: #e0e0e0;
+        }
+
+        .category-tag.active {
+            background: #1a73e8;
+            color: white;
+        }
+
+        /* Resultados */
+        .results-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .results-count {
+            color: #666;
+        }
+
+        /* Tarjeta de producto */
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .price-table th {
+            text-align: left;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .price-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .store-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .store-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: #1a73e8;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+
+        .discount-badge {
+            background: #ff5722;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .buy-button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .buy-button:hover {
+            background: #0d47a1;
+        }
+
+        .price-history {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        .history-chart {
+            height: 60px;
+            background: linear-gradient(to top, #e3f2fd 0%, #1a73e8 100%);
+            border-radius: 8px;
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .price-table {
+                font-size: 0.9rem;
+            }
+            
+            .price-table th:nth-child(3),
+            .price-table td:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🔍 PrecioJusto</h1>
+        <p>Compara precios de más de 50 tiendas online y ahorra en tus compras</p>
+    </header>
+
+    <div class="container">
+        <!-- Sección de búsqueda -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="¿Qué producto buscas? Ej: iPhone 15, Samsung TV, Nike Air Max..." value="iPhone">
+                <button onclick="searchProducts()">🔎 Buscar</button>
+            </div>
+            <div class="categories" id="categoryContainer">
+                <span class="category-tag active" data-category="all">Todos</span>
+                <span class="category-tag" data-category="electronica">📱 Electrónica</span>
+                <span class="category-tag" data-category="hogar">🏠 Hogar</span>
+                <span class="category-tag" data-category="ropa">👕 Ropa</span>
+                <span class="category-tag" data-category="deporte">⚽ Deporte</span>
+            </div>
+        </div>
+
+        <!-- Sección de resultados -->
+        <div class="results-section">
+            <div class="results-header">
+                <h2>Resultados</h2>
+                <span class="results-count" id="resultCount">0 productos encontrados</span>
+            </div>
+            <div id="resultsContainer">
+                <!-- Los resultados se cargarán aquí dinámicamente -->
+                <div class="loading">Cargando productos...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2026 PrecioJusto - Proyecto académico de Digitalización | Los precios son simulados con fines demostrativos</p>
+        <p style="margin-top: 0.5rem;">📧 Contacto: info@preciojusto.es | 🔒 Cumple con RGPD</p>
+    </footer>
+
+    <script>
+        // Simulación de base de datos de productos con precios de diferentes tiendas
+        const mockDatabase = [
+            {
+                id: 1,
+                name: 'iPhone 15 128GB',
+                description: 'Apple iPhone 15 con pantalla Super Retina XDR de 6.1", chip A16 Bionic y cámara de 48MP',
+                category: 'electronica',
+                image: '📱',
+                stores: [
+                    { store: 'Amazon', price: 799.99, originalPrice: 959.00, url: '#', logo: 'A' },
+                    { store: 'MediaMarkt', price: 849.00, originalPrice: 959.00, url: '#', logo: 'M' },
+                    { store: 'El Corte Inglés', price: 879.00, originalPrice: 959.00, url: '#', logo: 'E' },
+                    { store: 'Fnac', price: 829.99, originalPrice: 959.00, url: '#', logo: 'F' }
+                ],
+                priceHistory: [959, 929, 899, 879, 849, 829, 799]
+            },
+            {
+                id: 2,
+                name: 'Samsung Galaxy S24 Ultra 256GB',
+                description: 'Samsung Galaxy S24 Ultra con S Pen integrado, cámara de 200MP y pantalla Dynamic AMOLED 2X de 6.8"',
+                category: 'electronica',
+                image: '📱',
+                stores: [
+                    { store: 'Amazon', price: 1099.99, originalPrice: 1459.00, url: '#', logo: 'A' },
+                    { store: 'MediaMarkt', price: 1199.00, originalPrice: 1459.00, url: '#', logo: 'M' },
+                    { store: 'El Corte Inglés', price: 1249.00, originalPrice: 1459.00, url: '#', logo: 'E' },
+                    { store: 'PcComponentes', price: 1149.99, originalPrice: 1459.00, url: '#', logo: 'P' }
+                ],
+                priceHistory: [1459, 1399, 1299, 1249, 1199, 1149, 1099]
+            },
+            {
+                id: 3,
+                name: 'Nike Air Max 90',
+                description: 'Zapatillas deportivas Nike Air Max 90, amortiguación visible y diseño clásico',
+                category: 'ropa',
+                image: '👟',
+                stores: [
+                    { store: 'Amazon', price: 89.99, originalPrice: 139.99, url: '#', logo: 'A' },
+                    { store: 'Zalando', price: 99.99, originalPrice: 139.99, url: '#', logo: 'Z' },
+                    { store: 'El Corte Inglés', price: 109.00, originalPrice: 139.99, url: '#', logo: 'E' },
+                    { store: 'Foot Locker', price: 94.99, originalPrice: 139.99, url: '#', logo: 'F' }
+                ],
+                priceHistory: [139, 129, 119, 109, 104, 99, 89]
+            },
+            {
+                id: 4,
+                name: 'Cafetera Nespresso Vertuo Plus',
+                description: 'Cafetera automática con sistema de cápsulas Vertuo, prepara 5 tamaños de café',
+                category: 'hogar',
+                image: '☕',
+                stores: [
+                    { store: 'Amazon', price: 119.99, originalPrice: 179.00, url: '#', logo: 'A' },
+                    { store: 'MediaMarkt', price: 129.00, originalPrice: 179.00, url: '#', logo: 'M' },
+                    { store: 'El Corte Inglés', price: 139.00, originalPrice: 179.00, url: '#', logo: 'E' }
+                ],
+                priceHistory: [179, 169, 159, 149, 139, 129, 119]
+            },
+            {
+                id: 5,
+                name: 'Sony WH-1000XM5 Auriculares',
+                description: 'Auriculares inalámbricos con cancelación de ruido líder del sector y hasta 30h de batería',
+                category: 'electronica',
+                image: '🎧',
+                stores: [
+                    { store: 'Amazon', price: 299.99, originalPrice: 399.99, url: '#', logo: 'A' },
+                    { store: 'MediaMarkt', price: 319.00, originalPrice: 399.99, url: '#', logo: 'M' },
+                    { store: 'Fnac', price: 309.99, originalPrice: 399.99, url: '#', logo: 'F' }
+                ],
+                priceHistory: [399, 379, 359, 339, 329, 319, 299]
+            },
+            {
+                id: 6,
+                name: 'Bicicleta Elíptica Cecotec',
+                description: 'Bicicleta elíptica con volante de inercia de 8kg y monitor LCD',
+                category: 'deporte',
+                image: '🚲',
+                stores: [
+                    { store: 'Amazon', price: 199.99, originalPrice: 299.00, url: '#', logo: 'A' },
+                    { store: 'Decathlon', price: 219.99, originalPrice: 299.00, url: '#', logo: 'D' },
+                    { store: 'Carrefour', price: 209.00, originalPrice: 299.00, url: '#', logo: 'C' }
+                ],
+                priceHistory: [299, 279, 259, 239, 219, 209, 199]
+            }
+        ];
+
+        let currentCategory = 'all';
+        let currentSearchTerm = '';
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupCategoryListeners();
+            // Búsqueda inicial
+            currentSearchTerm = document.getElementById('searchInput').value;
+            searchProducts();
+        });
+
+        function setupCategoryListeners() {
+            const categories = document.querySelectorAll('.category-tag');
+            categories.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    categories.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    searchProducts();
+                });
+            });
+        }
+
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            currentSearchTerm = searchTerm;
+            
+            // Filtrar productos
+            let filteredProducts = mockDatabase;
+            
+            // Filtrar por categoría
+            if (currentCategory !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
+            }
+            
+            // Filtrar por término de búsqueda
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) || 
+                    p.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Mostrar resultados
+            displayResults(filteredProducts);
+        }
+
+        function displayResults(products) {
+            const container = document.getElementById('resultsContainer');
+            const countElement = document.getElementById('resultCount');
+            
+            countElement.textContent = `${products.length} producto(s) encontrado(s)`;
+            
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <p>😕 No encontramos productos que coincidan con "${currentSearchTerm}"</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">Prueba con otro término o categoría</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            products.forEach(product => {
+                // Ordenar tiendas por precio (más barato primero)
+                const sortedStores = [...product.stores].sort((a, b) => a.price - b.price);
+                const bestPrice = sortedStores[0];
+                const savings = bestPrice.originalPrice - bestPrice.price;
+                const discountPercent = Math.round((savings / bestPrice.originalPrice) * 100);
+                
+                // Construir tabla de precios
+                let storesHtml = '';
+                sortedStores.forEach(store => {
+                    storesHtml += `
+                        <tr>
+                            <td>
+                                <div class="store-logo">
+                                    <span class="store-icon">${store.logo}</span>
+                                    <span>${store.store}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price">${store.price.toFixed(2)}€</span>
+                                ${store.originalPrice ? `<span class="original-price">${store.originalPrice.toFixed(2)}€</span>` : ''}
+                            </td>
+                            <td>
+                                ${store.originalPrice && store.price < store.originalPrice ? 
+                                    `<span class="discount-badge">-${Math.round(((store.originalPrice - store.price) / store.originalPrice) * 100)}%</span>` : 
+                                    ''}
+                            </td>
+                            <td>
+                                <a href="${store.url}" class="buy-button" target="_blank">Comprar →</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Simular gráfico de histórico
+                const maxPrice = Math.max(...product.priceHistory);
+                const minPrice = Math.min(...product.priceHistory);
+                const range = maxPrice - minPrice;
+                
+                html += `
+                    <div class="product-card">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <div style="font-size: 3rem;">${product.image}</div>
+                            <div style="flex: 1;">
+                                <h3 class="product-name">${product.name}</h3>
+                                <p class="product-description">${product.description}</p>
+                            </div>
+                        </div>
+                        
+                        <table class="price-table">
+                            <thead>
+                                <tr>
+                                    <th>Tienda</th>
+                                    <th>Precio</th>
+                                    <th>Descuento</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${storesHtml}
+                            </tbody>
+                        </table>
+                        
+                        <div class="price-history">
+                            <div class="history-title">📈 Histórico de precio más bajo (últimos 7 días)</div>
+                            <div style="display: flex; align-items: flex-end; gap: 2px; height: 60px; margin: 0.5rem 0;">
+                                ${product.priceHistory.map(price => {
+                                    const height = range > 0 ? ((price - minPrice) / range) * 100 : 50;
+                                    return `<div style="flex: 1; background: linear-gradient(to top, #1a73e8, #64b5f6); height: ${height}%; border-radius: 4px 4px 0 0; min-width: 20px;"></div>`;
+                                }).join('')}
+                            </div>
+                            <p style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
+                                💰 Mejor precio actual: <strong>${bestPrice.price.toFixed(2)}€</strong> en ${bestPrice.store} 
+                                (ahorras ${savings.toFixed(2)}€, -${discountPercent}%)
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+    </script>
+</body>
+</html>
